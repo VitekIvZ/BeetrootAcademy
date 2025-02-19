@@ -12,7 +12,7 @@ For the current task, you can choose any weather API or website or use openweath
 import requests
 
 # OpenWeatherMap API key
-API_KEY = "430eec3054f6e79a2461b947e9d14567"  
+API_KEY = "your key"  
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"  
 
 def get_weather(city_name):
