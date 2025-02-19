@@ -1,0 +1,51 @@
+[
+    {
+        "number": "38033 9348021",
+        "firstname": "Bil",
+        "lastname": "Gates",
+        "city": "New York",
+        "state": "NY"
+    },
+    {
+        "number": "380441234567",
+        "firstname": "John",
+        "lastname": "Doe",
+        "city": "New York",
+        "state": "NY"
+    },
+    {
+        "number": "38045 9348024",
+        "firstname": "Mark",
+        "lastname": "Zuckerberg",
+        "city": "New York",
+        "state": "NY"
+    },
+    {
+        "number": "38077 9348024",
+        "firstname": "Ilon",
+        "lastname": "Mask",
+        "city": "New York",
+        "state": "NY"
+    },
+    {
+        "number": "38097 9348024",
+        "firstname": "Donald",
+        "lastname": "Trump",
+        "city": "New York",
+        "state": "NY"
+    },
+    {
+        "number": "380981234567",
+        "firstname": "Vik",
+        "lastname": "Zay",
+        "city": "Kyiv",
+        "state": "UA"
+    },
+    {
+        "number": "380987654321",
+        "firstname": "Jane",
+        "lastname": "Smith",
+        "city": "Los Angeles",
+        "state": "CA"
+    }
+]

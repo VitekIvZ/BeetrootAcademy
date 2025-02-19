@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, city TEXT, phone_number INTEGER);
+ALTER TABLE users RENAME TO clients;
+ALTER TABLE clients ADD COLUMN email TEXT;
+INSERT INTO clients (name, city, phone_number, email) VALUES ('Bret Peet', 'Mexico', '123456789', 'bp@exp.com');
+INSERT INTO clients (name, city, phone_number, email) VALUES ('Jhon Deer', 'Ottava', '987654321', 'jd@exp.com');
+INSERT INTO clients (name, city, phone_number, email) VALUES ('Omar Green', 'Tokio', '678912345', 'og@exp.com');
+SELECT * FROM clients;
+UPDATE clients SET city='Berlin', phone_number='432156789' WHERE id='1';
+SELECT * FROM clients;
+DELETE FROM clients WHERE name='Bret Peet';
+SELECT * FROM clients;
