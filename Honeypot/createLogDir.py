@@ -1,3 +1,6 @@
+#! /bin/python
+
+
 import socket
 import sys
 import datetime
