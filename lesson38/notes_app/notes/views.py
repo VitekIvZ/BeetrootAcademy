@@ -1,4 +1,4 @@
 from django.http import HttpResponse
 
 def hello_notes(request):
-    return HttpResponse("Hello from Notes app.")
+    return HttpResponse("<h1>Hello from Notes app.</h1>")
