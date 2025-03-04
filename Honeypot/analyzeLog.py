@@ -3,6 +3,7 @@
 
 import datetime
 import json
+import argparse
 
 def analyze_logs(log_file):
     """Enhanced honeypot log analysis with temporal and behavioral patterns"""
@@ -75,9 +76,7 @@ def analyze_logs(log_file):
 
     # 1. IP-based Analysis
     print("\nTop 10 Most Active IPs:")
-    sorted_ips = sorted(ip_analysis.items(), 
-                       key=lambda x: x[1]['total_attempts'], 
-                       reverse=True)[:10]
+    sorted_ips = sorted(ip_analysis.items(), key=lambda x: x[1]['total_attempts'], reverse=True)[:10]
     for ip, stats in sorted_ips:
         duration = stats['last_seen'] - stats['first_seen']
         print(f"\nIP: {ip}")
@@ -88,9 +87,7 @@ def analyze_logs(log_file):
 
     # 2. Port Analysis
     print("\nPort Targeting Analysis:")
-    sorted_ports = sorted(port_analysis.items(),
-                         key=lambda x: x[1]['total_attempts'],
-                         reverse=True)
+    sorted_ports = sorted(port_analysis.items(), key=lambda x: x[1]['total_attempts'], reverse=True)
     for port, stats in sorted_ports:
         print(f"\nPort {port}:")
         print(f"Total Attempts: {stats['total_attempts']}")
@@ -120,4 +117,15 @@ def analyze_logs(log_file):
         if len(payload) > 50:  # Truncate long payloads
             payload = payload[:50] + "..."
         print(f"Count {count}: {payload}")
+        
+        
+def main():
+    parser = argparse.ArgumentParser(description="Analyze honeypot logs.")
+    parser.add_argument("log_file", help="Path to the log file in JSON format.")
+    args = parser.parse_args()
 
+    analyze_logs(args.log_file)        
+
+
+if __name__ == "__main__":
+    main()
