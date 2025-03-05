@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Список нотаток</title>
+</head>
+<body>
+    <h1>Мої нотатки</h1>
+    <a href="{% url 'note_create' %}">Додати нову нотатку</a>
+
+    <form method="get">
+        <input type="text" name="search" placeholder="Пошук за назвою">
+        <select name="category">
+            <option value="">Всі категорії</option>
+            <option value="Робота">Робота</option>
+            <option value="Особисте">Особисте</option>
+            <option value="Навчання">Навчання</option>
+        </select>
+        <input type="datetime-local" name="reminder">
+        <button type="submit">Фільтрувати</button>
+    </form>
+
+    <ul>
+        {% for note in notes %}
+            <li>
+                <a href="{% url 'note_detail' note.pk %}">{{ note.title }}</a>
+                <p>{{ note.text }}</p>
+                <p>Категорія: {{ note.category }}</p>
+                <p>Нагадування: {{ note.reminder|default:"Немає" }}</p>
+                <a href="{% url 'note_edit' note.pk %}">Редагувати</a>
+                <form action="{% url 'note_delete' note.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Видалити</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
