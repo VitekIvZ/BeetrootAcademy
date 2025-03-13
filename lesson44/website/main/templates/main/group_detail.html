@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+{% block title %} {{ group.name }} {% endblock %}
+{% block content %}
+<h2>{{ group.name }}</h2>
+
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'create-group-post' group.id %}">Create Post</a>
+    </li>
+</ul>
+
+<ul>
+    {% for post in group.posts.all %}
+    <li>
+        <a href="{% url 'post-detail' post.id %}">{{ post.title }}</a> by {{ post.author.username }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
