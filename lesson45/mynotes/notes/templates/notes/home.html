@@ -1,0 +1,24 @@
+{% extends 'notes/base.html' %}
+{% block title %} Home {% endblock %}
+{% block content %}
+<h1>Notes</h1>
+<a href="{% url 'create-note' %}" class="btn btn-success mb-3">Create Note</a>
+<ul>
+{% for note in notes %}
+    <li>
+        <h2>{{ note.title }}</h2>
+        <p>{{ note.text }}</p>
+        <p>Category: {{ note.category.title }}</p>
+        {% if note.reminder %}
+            <p>Reminder: {{ note.reminder }}</p>
+        {% endif %}
+        <a href="{% url 'update-note' note.id %}" class="btn btn-primary">Update</a>
+        <form method="post" action="{% url 'delete-note' note.id %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
+
