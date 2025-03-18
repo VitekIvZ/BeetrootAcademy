@@ -1,0 +1,19 @@
+{% extends 'blog/base_blog.html' %}
+
+{% block title %}
+    {{ block.super }} | Post list 
+{% endblock %}
+
+{% block menu %}
+    <li><a href="{% url 'home_blog_url' %}">Home Blog</a></li>
+    <li><a href="{% url 'tag_create_url' %}">Create tag</a> </li>
+{% endblock %}
+
+{% block body %}
+    {% for tag in tags %}
+         <!-- % url 'post_detail_url' slug=post.slug %  -->       
+        <h3> <a href="{{ tag.get_absolute_url }}"> {{ tag.title }} </a></h3>
+
+
+    {% endfor %}
+{% endblock %}

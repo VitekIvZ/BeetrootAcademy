@@ -1,0 +1,28 @@
+{% extends 'blog/base_blog.html' %}
+
+{% block title %}
+    {{ block.super }} | Post
+{% endblock %}
+
+{% block menu %}
+    <li><a href="{% url 'posts_list_url' %}">Post list</a></li>
+    {% if request.user.is_authenticated %}
+        <li><a href="{% url 'post_update_url' slug=post.slug %}">Post update</a></li>
+        <li><a href="{% url 'post_delete_url' slug=post.slug %}">Post delete</a></li>
+        <li style="float: right;"><a href="#">{{ user.username }}</a>|<a href="{% url 'logout' %}">Logout</a> </li>
+    {% else %}
+        <li style="float: right;"><a href="#">Register</a>|<a href="{% url 'login' %}">Login</a></li>
+    {% endif %}
+{% endblock %}
+{% block body %}            
+    <h3>{{ post.title }}</h3>
+
+    <p> {{ post.body }}</p>
+    {% if post.tags.all %}
+        {% for tag in post.tags.all %}
+            <li><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a></li>
+        {% endfor %}
+    {% endif %}
+
+    <h4>Published at {{post.published}}, modified at {{post.modified}} </h4>
+{% endblock %}

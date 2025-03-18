@@ -1,0 +1,26 @@
+{% extends 'blog/base_blog.html' %}
+
+{% block title %}
+    {{ block.super }} | Create Post
+{% endblock %}
+
+{% block menu %}
+    <li><a href="{% url 'posts_list_url' %}">Post list</a></li>
+
+{% endblock %}
+
+{% block body %}
+    <form action="{% url 'tag_delete_url' slug=tag.slug %}", method=post>
+        {% csrf_token %}
+        
+        
+        <h3> A you sure you want to delete tag  <b>{{ tag.title}}</b> </h3>
+        <a href="{{ tag.get_absolute_url }}">Cancel</a>
+        <button type="submit">Delete</button>
+        <!--
+            {{post.as_p}}
+        -->
+
+    </form>    
+            
+{% endblock %}

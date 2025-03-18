@@ -8,6 +8,12 @@ import socket
 import time
 import random
 from concurrent.futures import ThreadPoolExecutor
+import logging
+import asyncio 
+import queue
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class HoneypotSimulator:
     """
@@ -56,46 +62,46 @@ class HoneypotSimulator:
         """
         try:
             # Create a new socket connection
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(3)
-
-            print(f"[*] Attempting connection to {self.target_ip}:{port}")
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(3)
+                
+            logger.info(f"[*] Attempting connection to {self.target_ip}:{port}")
             sock.connect((self.target_ip, port))
 
             # Get banner if any
             banner = sock.recv(1024)
-            print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
+            logger.info(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
 
             # Send attack patterns based on the port
             if port in self.attack_patterns:
                 for command in self.attack_patterns[port]:
-                    print(f"[*] Sending command to port {port}: {command.strip()}")
+                    logger.info(f"[*] Sending command to port {port}: {command.strip()}")
                     sock.send(command.encode())
 
                     # Wait for response
                     try:
                         response = sock.recv(1024)
-                        print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
+                        logger.info(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
                     except socket.timeout:
-                        print(f"[-] No response received from port {port}")
+                        logger.info(f"[-] No response received from port {port}")
 
                     # Add realistic delay between commands
-                    time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
+                    asyncio.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
 
             sock.close()
 
         except ConnectionRefusedError:
-            print(f"[-] Connection refused on port {port}")
+            logger.info(f"[-] Connection refused on port {port}")
         except socket.timeout:
-            print(f"[-] Connection timeout on port {port}")
-        except Exception as e:
-            print(f"[-] Error connecting to port {port}: {e}")
+            logger.info(f"[-] Connection timeout on port {port}")
+        except socket.error as e:
+            logger.info(f"[-] Error connecting to port {port}: {e}")
 
     def simulate_port_scan(self):
         """
         Simulates a basic port scan across common ports
         """
-        print(f"\n[*] Starting port scan simulation against {self.target_ip}")
+        logger.info(f"\n[*] Starting port scan simulation against {self.target_ip}")
         for port in self.target_ports:
             self.simulate_connection(port)
             time.sleep(random.uniform(0.1, 0.3))
@@ -107,14 +113,14 @@ class HoneypotSimulator:
         common_usernames = ["admin", "root", "user", "test"]
         common_passwords = ["password123", "admin123", "123456", "root"]
 
-        print(f"\n[*] Starting brute force simulation against port {port}")
+        logger.info(f"\n[*] Starting brute force simulation against port {port}")
 
         for username in common_usernames:
             for password in common_passwords:
                 try:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.settimeout(2)
-                    sock.connect((self.target_ip, port))
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                        sock.settimeout(3)
+                        sock.connect((self.target_ip, port))
 
                     if port == 21:  # FTP
                         sock.send(f"USER {username}\r\n".encode())
@@ -124,19 +130,22 @@ class HoneypotSimulator:
                         sock.send(f"{username}:{password}\n".encode())
 
                     sock.close()
-                    time.sleep(random.uniform(0.1, 0.3))
+                    asyncio.sleep(random.uniform(0.1, 0.3))
 
                 except Exception as e:
-                    print(f"[-] Error in brute force attempt: {e}")
+                    logger.info(f"[-] Error in brute force attempt: {e}")
 
     def run_continuous_simulation(self, duration=300):
         """
         Runs a continuous simulation for a specified duration
         """
-        print(f"\n[*] Starting continuous simulation for {duration} seconds")
-        print(f"[*] Intensity level: {self.intensity}")
+        logger.info(f"\n[*] Starting continuous simulation for {duration} seconds")
+        logger.info(f"[*] Intensity level: {self.intensity}")
 
         end_time = time.time() + duration
+        
+        # Створюємо обмежену чергу завдань
+        task_queue = queue.Queue(maxsize=20)
 
         with ThreadPoolExecutor(
             max_workers=self.intensity_settings[self.intensity]["max_threads"]
@@ -151,7 +160,14 @@ class HoneypotSimulator:
                 ]
 
                 # Randomly choose and execute an attack pattern
-                executor.submit(random.choice(simulation_choices))
+                # Додаємо завдання до черги, якщо є місце
+                try:
+                    task_queue.put_nowait(random.choice(simulation_choices))
+                    executor.submit(task_queue.get_nowait())
+                    task_queue.task_done()
+                except queue.Full:
+                    logger.warning("Task queue is full. Waiting for free space...")
+                    time.sleep(0.1)
                 time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
 
 class HoneypotSimulatorApp:

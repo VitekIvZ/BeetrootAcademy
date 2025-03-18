@@ -1,0 +1,16 @@
+{% extends 'blog/base_blog.html' %}
+
+{% block title %}
+    {{ block.super }} | Post list 
+{% endblock %}
+
+{% block menu %}
+    <li><a href="{% url 'home_blog_url' %}">Home Blog</a></li>
+    <li><a href="{% url 'tag_update_url' slug=tag.slug %}">Tag update</a></li>
+    <li><a href="{% url 'tag_delete_url' slug=tag.slug %}">Tag delete</a></li>
+{% endblock %}
+
+{% block body %}
+    <h3>{{ tag.title }}</h3>
+
+{% endblock %}

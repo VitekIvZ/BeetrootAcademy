@@ -1,0 +1,30 @@
+{% extends 'blog/base_blog.html' %}
+
+{% block title %}
+    {{ block.super }} | Create Post
+{% endblock %}
+
+{% block menu %}
+    <li><a href="{% url 'posts_list_url' %}">Post list</a></li>
+
+{% endblock %}
+
+{% block body %}
+    <form action="{% url 'tag_update_url' slug=tag.slug %}", method=post>
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <p><label class=label for="{{field.id_for_label}}" >{{field.label}}</label>{{field}}</p>
+        {% if field.errors %}
+            <div class="error">{{field.errors}}</div>
+        {% endif %}
+
+        {% endfor %}
+        <!--
+            {{post.as_p}}
+        -->
+
+        <input type=submit value=Update>
+    </form>    
+            
+{% endblock %}
