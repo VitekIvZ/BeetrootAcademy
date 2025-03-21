@@ -57,39 +57,47 @@ class HoneypotSimulator:
         }
 
     def simulate_connection(self, port):
-        """
-        Simulates a connection attempt to a specific port with realistic attack patterns
-        """
+    """
+    Simulates a connection attempt to a specific port with realistic attack patterns
+    """
         print(f"[DEBUG] simulate_connection called for port {port}")
         try:
-            # Create a new socket connection
+        # Create a new socket connection
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.settimeout(3)
-                
+                ock.settimeout(5)
+            
                 print(f"[*] Attempting connection to {self.target_ip}:{port}")
                 sock.connect((self.target_ip, port))
 
-                # Get banner if any
-                banner = sock.recv(1024)
-                print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
+            # Get banner if any
+                try:
+                    banner = sock.recv(1024)
+                    print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
+                except socket.timeout:
+                    print(f"[-] No banner received from port {port}")
 
-                # Send attack patterns based on the port
+            # Send attack patterns based on the port
                 if port in self.attack_patterns:
                     for command in self.attack_patterns[port]:
-                        print(f"[*] Sending command to port {port}: {command.strip()}")
-                        sock.send(command.encode())
+                        try:
+                            print(f"[*] Sending command to port {port}: {command.strip()}")
+                            sock.send(command.encode())
 
                         # Wait for response
-                        try:
-                            response = sock.recv(1024)
-                            print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
-                        except socket.timeout:
-                            print(f"[-] No response received from port {port}")
+                            try:
+                                response = sock.recv(1024)
+                                print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
+                            except socket.timeout:
+                                print(f"[-] No response received from port {port}")
 
                         # Add realistic delay between commands
-                        time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
-
-            #sock.close()
+                            time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
+                        except BrokenPipeError:
+                            print(f"[-] Broken pipe error on port {port}. Connection might be closed.")
+                            break
+                        except socket.error as e:
+                            print(f"[-] Error sending data to port {port}: {e}")
+                            break
 
         except ConnectionRefusedError:
             print(f"[-] Connection refused on port {port}")
