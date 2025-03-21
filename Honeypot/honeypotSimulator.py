@@ -10,8 +10,8 @@ import argparse
 import logging
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+#logging.basicConfig(level=logging.INFO)
+#logger = logging.getLogger(__name__)
 
 class HoneypotSimulator:
     """
@@ -62,38 +62,38 @@ class HoneypotSimulator:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(3)
 
-                logger.info(f"[*] Attempting connection to {self.target_ip}:{port}")
+                print(f"[*] Attempting connection to {self.target_ip}:{port}")
                 sock.connect((self.target_ip, port))
 
                 # Get banner if any
                 banner = sock.recv(1024)
                 if banner:
-                    logger.info(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
+                    print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
                 else:
-                    logger.warning(f"[-] No banner received from port {port}")
+                    print(f"[-] No banner received from port {port}")
 
                 # Send attack patterns based on the port
                 if port in self.attack_patterns:
                     for command in self.attack_patterns[port]:
-                        logger.info(f"[*] Sending command to port {port}: {command.strip()}")
+                        print(f"[*] Sending command to port {port}: {command.strip()}")
                         sock.send(command.encode())
 
                         # Wait for response
                         try:
                             response = sock.recv(1024)
-                            logger.info(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
+                            print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
                         except socket.timeout:
-                            logger.warning(f"[-] No response received from port {port}")
+                            print(f"[-] No response received from port {port}")
 
                         # Add realistic delay between commands
                         time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
 
         except ConnectionRefusedError:
-            logger.warning(f"[-] Connection refused on port {port}")
+            print(f"[-] Connection refused on port {port}")
         except socket.timeout:
-            logger.warning(f"[-] Connection timeout on port {port}")
+            print(f"[-] Connection timeout on port {port}")
         except Exception as e:
-            logger.error(f"[-] Error connecting to port {port}: {e}")
+            print(f"[-] Error connecting to port {port}: {e}")
 
     def simulate_port_scan(self):
         """

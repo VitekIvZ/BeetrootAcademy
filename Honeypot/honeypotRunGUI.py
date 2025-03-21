@@ -13,26 +13,42 @@ from pathlib import Path
 # Configure logging directory
 LOG_DIR = Path("honeypot_logs")
 LOG_DIR.mkdir(exist_ok=True)
+if not LOG_DIR.exists():
+    print(f"Error: Directory {LOG_DIR} could not be created.")
 
 class Honeypot:
-    def __init__(self, bind_ip="0.0.0.0", ports=None):
+    def __init__(self, bind_ip="0.0.0.0", ports=None, log_text=None):
         self.bind_ip = bind_ip
         self.ports = ports or [21, 22, 80, 443]  # Default ports to monitor
         self.active_connections = {}
         self.log_file = LOG_DIR / f"honeypot_{datetime.datetime.now().strftime('%Y%m%d')}.json"
-
+        self.log_lock = threading.Lock()
+        self.log_text = log_text  # Додаємо текстове поле для логів
+    
     def log_activity(self, port, remote_ip, data):
         """Log suspicious activity with timestamp and details"""
+        try:
+            data_str = data.decode('utf-8', errors='ignore')
+        except Exception as e:
+            print(f"Error decoding data: {e}")
+            data_str = "[Binary data]"
+            
         activity = {
             "timestamp": datetime.datetime.now().isoformat(),
             "remote_ip": remote_ip,
             "port": port,
-            "data": data.decode('utf-8', errors='ignore')
+            "data": data_str
         }
-
-        with open(self.log_file, 'a') as f:
-            json.dump(activity, f)
-            f.write('\n')
+        
+        with self.log_lock:
+            with open(self.log_file, 'a') as f:
+                json.dump(activity, f)
+                f.write('\n')
+            # Додавання запису у текстове поле
+            if self.log_text:  # Перевіряємо, чи передано текстове поле
+                self.log_text.insert(tk.END, f"{activity['timestamp']} - {activity['remote_ip']}:{activity['port']} - {activity['data']}\n")
+                self.log_text.see(tk.END)  # Прокрутка до останнього запису
+	
 
     def handle_connection(self, client_socket, remote_ip, port):
         """Handle individual connections and emulate services"""
@@ -109,13 +125,30 @@ class HoneypotApp:
         self.start_button = tk.Button(root, text="Start Honeypot", command=self.start_honeypot)
         self.start_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
         
+        # Output console label
+        self.output_console_label = tk.Label(root, text="Output Console:")
+        self.output_console_label.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="w")
+
         # Output console
-        self.output_console = scrolledtext.ScrolledText(root, width=80, height=20)
-        self.output_console.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.output_console = scrolledtext.ScrolledText(root, width=50, height=10)
+        self.output_console.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+
+        # Log text label
+        self.log_text_label = tk.Label(root, text="Log Activity:")
+        self.log_text_label.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="w")
+
+        # Log text
+        self.log_text = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=50, height=10)
+        self.log_text.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        
+        # Налаштування розтягування рядків і стовпців
+        root.grid_rowconfigure(4, weight=1)
+        root.grid_rowconfigure(6, weight=1)
+        root.grid_columnconfigure(1, weight=1)
         
         # Exit button
         self.exit_button = tk.Button(root, text="Exit", command=self.root.quit, width=20, height=2)
-        self.exit_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+        self.exit_button.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
                 
 
     def start_honeypot(self):
@@ -133,22 +166,22 @@ class HoneypotApp:
             messagebox.showerror("Error", "Please enter at least one port.")
             return
 
-        # Convert ports to a list of integers
+    # Convert ports to a list of integers
         try:
             ports = [int(port.strip()) for port in ports.split(",")]
         except ValueError:
             messagebox.showerror("Error", "Invalid port format. Please use comma-separated integers.")
             return
 
-        # Clear the console
+    # Clear the console
         self.output_console.delete(1.0, tk.END)
 
-        # Redirect print statements to the console
+    # Redirect print statements to the console
         import sys
         sys.stdout = TextRedirector(self.output_console, "stdout")
 
-        # Start the honeypot in a separate thread
-        self.honeypot = Honeypot(bind_ip, ports)
+    # Start the honeypot in a separate thread
+        self.honeypot = Honeypot(bind_ip, ports, log_text=self.log_text)  # Передаємо log_text
         honeypot_thread = threading.Thread(target=self.run_honeypot)
         honeypot_thread.daemon = True
         honeypot_thread.start()

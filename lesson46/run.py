@@ -8,13 +8,13 @@ from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.client.default import DefaultBotProperties
 
-from config import TOKEN
+from config import TOKEN, JSON_URL, CHANNEL_ID
 from keyboards import main_menu
 
 # Налаштування
 API_TOKEN = TOKEN  
-JSON_URL = 'https://jsonplaceholder.typicode.com/comments'
-CHANNEL_ID = '-1002599012769'  
+JSON_URL = JSON_URL
+CHANNEL_ID = CHANNEL_ID
 menu_keyboard = main_menu
 
 # Налаштування логування
