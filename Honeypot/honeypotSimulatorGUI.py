@@ -276,16 +276,16 @@ class TextRedirector:
         self.tag = tag
         self.buffer = ""        
 
-    # def write(self, text):
-    #     self.widget.after(0, self.widget.insert, tk.END, text, (self.tag,))
-    #     self.widget.after(0, self.widget.see, tk.END)
-        
     def write(self, text):
-        self.buffer += text
-        if len(self.buffer) > 100:  # Оновлюємо GUI тільки після накопичення 100 символів
-            self.widget.insert(tk.END, self.buffer)
-            self.widget.see(tk.END)
-            self.buffer = ""
+        self.widget.after(0, self.widget.insert, tk.END, text, (self.tag,))
+        self.widget.after(0, self.widget.see, tk.END)
+        
+    # def write(self, text):
+    #     self.buffer += text
+    #     if len(self.buffer) > 100:  # Оновлюємо GUI тільки після накопичення 100 символів
+    #         self.widget.insert(tk.END, self.buffer)
+    #         self.widget.see(tk.END)
+    #         self.buffer = ""
 
     def flush(self):
         pass
