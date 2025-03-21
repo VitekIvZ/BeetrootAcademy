@@ -233,9 +233,16 @@ class TextRedirector:
         self.widget = widget
         self.tag = tag
 
+    # def write(self, text):
+    #     self.widget.insert(tk.END, text, (self.tag,))
+    #     self.widget.see(tk.END)
+    
     def write(self, text):
-        self.widget.insert(tk.END, text, (self.tag,))
-        self.widget.see(tk.END)
+        self.buffer += text
+        if len(self.buffer) > 100:  # Оновлюємо GUI тільки після накопичення 100 символів
+            self.widget.insert(tk.END, self.buffer)
+            self.widget.see(tk.END)
+            self.buffer = ""
 
     def flush(self):
         pass
