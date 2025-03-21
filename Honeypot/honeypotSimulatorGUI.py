@@ -189,6 +189,7 @@ class HoneypotSimulator:
         
 class HoneypotSimulatorApp:
     def __init__(self, root):
+        self.queue = queue.Queue()
         self.root = root
         self.root.title("Honeypot Simulator")
 
@@ -223,7 +224,12 @@ class HoneypotSimulatorApp:
         self.exit_button = tk.Button(root, text="Exit", command=self.root.quit, width=20, height=2)
         self.exit_button.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
         
-        
+    def process_queue(self):
+        while not self.queue.empty():
+            message = self.queue.get()
+            self.output_console.insert(tk.END, message)
+            self.output_console.see(tk.END)
+        self.root.after(100, self.process_queue)    
 
     def start_simulation(self):
         """
@@ -245,9 +251,13 @@ class HoneypotSimulatorApp:
         sys.stdout = TextRedirector(self.output_console, "stdout")
 
         # Run the simulation in a separate thread
-        simulator = HoneypotSimulator(target_ip, intensity)
-        simulation_thread = threading.Thread(target=simulator.run_continuous_simulation, args=(duration,))
+        simulator = HoneypotSimulator(self.target_ip_entry.get(), self.intensity_var.get())
+        simulation_thread = threading.Thread(target=self.run_simulation, args=(simulator,))
         simulation_thread.start()
+        self.process_queue()
+        
+    def run_simulation(self, simulator):
+        simulator.run_continuous_simulation(duration=300, output_queue=self.queue)        
 
 class TextRedirector:
     """
@@ -257,9 +267,16 @@ class TextRedirector:
         self.widget = widget
         self.tag = tag
 
+    # def write(self, text):
+    #     self.widget.after(0, self.widget.insert, tk.END, text, (self.tag,))
+    #     self.widget.after(0, self.widget.see, tk.END)
+        
     def write(self, text):
-        self.widget.insert(tk.END, text, (self.tag,))
-        self.widget.see(tk.END)
+        self.buffer += text
+        if len(self.buffer) > 100:  # Оновлюємо GUI тільки після накопичення 100 символів
+            self.widget.insert(tk.END, self.buffer)
+            self.widget.see(tk.END)
+            self.buffer = ""
 
     def flush(self):
         pass
