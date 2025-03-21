@@ -66,30 +66,30 @@ class HoneypotSimulator:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(3)
                 
-            print(f"[*] Attempting connection to {self.target_ip}:{port}")
-            sock.connect((self.target_ip, port))
+                print(f"[*] Attempting connection to {self.target_ip}:{port}")
+                sock.connect((self.target_ip, port))
 
-            # Get banner if any
-            banner = sock.recv(1024)
-            print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
+                # Get banner if any
+                banner = sock.recv(1024)
+                print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
 
-            # Send attack patterns based on the port
-            if port in self.attack_patterns:
-                for command in self.attack_patterns[port]:
-                    print(f"[*] Sending command to port {port}: {command.strip()}")
-                    sock.send(command.encode())
+                # Send attack patterns based on the port
+                if port in self.attack_patterns:
+                    for command in self.attack_patterns[port]:
+                        print(f"[*] Sending command to port {port}: {command.strip()}")
+                        sock.send(command.encode())
 
-                    # Wait for response
-                    try:
-                        response = sock.recv(1024)
-                        print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
-                    except socket.timeout:
-                        print(f"[-] No response received from port {port}")
+                        # Wait for response
+                        try:
+                            response = sock.recv(1024)
+                            print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
+                        except socket.timeout:
+                            print(f"[-] No response received from port {port}")
 
-                    # Add realistic delay between commands
-                    time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
+                        # Add realistic delay between commands
+                        time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
 
-            sock.close()
+            #sock.close()
 
         except ConnectionRefusedError:
             print(f"[-] Connection refused on port {port}")
@@ -121,18 +121,18 @@ class HoneypotSimulator:
             for password in common_passwords:
                 try:
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                        sock.settimeout(3)
+                        sock.settimeout(5)
                         sock.connect((self.target_ip, port))
 
-                    if port == 21:  # FTP
-                        sock.send(f"USER {username}\r\n".encode())
-                        sock.recv(1024)
-                        sock.send(f"PASS {password}\r\n".encode())
-                    elif port == 22:  # SSH
-                        sock.send(f"{username}:{password}\n".encode())
+                        if port == 21:  # FTP
+                            sock.send(f"USER {username}\r\n".encode())
+                            sock.recv(1024)
+                            sock.send(f"PASS {password}\r\n".encode())
+                        elif port == 22:  # SSH
+                            sock.send(f"{username}:{password}\n".encode())
 
-                    sock.close()
-                    asyncio.sleep(random.uniform(0.1, 0.3))
+                    #sock.close()
+                    time.sleep(random.uniform(0.1, 0.3))
 
                 except Exception as e:
                     print(f"[-] Error in brute force attempt: {e}")
