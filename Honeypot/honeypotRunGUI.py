@@ -29,6 +29,8 @@ class Honeypot:
         """Log suspicious activity with timestamp and details"""
         try:
             data_str = data.decode('utf-8', errors='ignore')
+            if not data_str.strip():  # Перевірка на порожній рядок
+                data_str = "[Empty or non-decodable data]"
         except Exception as e:
             print(f"Error decoding data: {e}")
             data_str = "[Binary data]"
@@ -63,13 +65,16 @@ class Honeypot:
             # Send appropriate banner for the service
             if port in service_banners:
                 client_socket.send(service_banners[port].encode())
+                print(f"Sent banner to {remote_ip}:{port}")
 
             # Receive data from attacker
             while True:
                 data = client_socket.recv(1024)
                 if not data:
+                    print(f"No data received from {remote_ip}:{port}. Closing connection.")
                     break
-
+                
+                print(f"Received data from {remote_ip}:{port} - {data}")
                 self.log_activity(port, remote_ip, data)
 
                 # Send fake response
