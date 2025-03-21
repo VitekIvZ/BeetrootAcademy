@@ -69,21 +69,35 @@ class Honeypot:
 
             # Receive data from attacker
             while True:
-                data = client_socket.recv(1024)
-                if not data:
-                    print(f"No data received from {remote_ip}:{port}. Closing connection.")
-                    break
+                try:
+                    data = client_socket.recv(1024)
+                    if not data:
+                        print(f"No data received from {remote_ip}:{port}. Closing connection.")
+                        break
                 
-                print(f"Received data from {remote_ip}:{port} - {data}")
-                self.log_activity(port, remote_ip, data)
+                    print(f"Received data from {remote_ip}:{port} - {data}")
+                    self.log_activity(port, remote_ip, data)
 
-                # Send fake response
-                client_socket.send(b"Command not recognized.\r\n")
+                    # Send fake response
+                    client_socket.send(b"Command not recognized.\r\n")
+                except BrokenPipeError:
+                    print(f"[-] Broken pipe error on port {port}. Connection might be closed by {remote_ip}.")
+                    break
+                except ConnectionResetError:
+                    print(f"[-] Connection reset by peer {remote_ip}:{port}.")
+                    break
+                except socket.timeout:
+                    print(f"[-] Timeout while receiving data from {remote_ip}:{port}.")
+                    break
+                except socket.error as e:
+                    print(f"[-] Socket error while communicating with {remote_ip}:{port}: {e}")
+                    break
 
         except Exception as e:
-            print(f"Error handling connection: {e}")
+            print(f"Error handling connection from {remote_ip}:{port}: {e}")
         finally:
             client_socket.close()
+            print(f"Connection with {remote_ip}:{port} closed.")
 
     def start_listener(self, port):
         """Start a listener on specified port"""

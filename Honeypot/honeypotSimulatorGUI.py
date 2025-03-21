@@ -95,6 +95,9 @@ class HoneypotSimulator:
                         except BrokenPipeError:
                             print(f"[-] Broken pipe error on port {port}. Connection might be closed.")
                             break
+                        except ConnectionResetError:
+                            print(f"[-] Connection reset by peer on port {port}.")
+                            break
                         except socket.error as e:
                             print(f"[-] Error sending data to port {port}: {e}")
                             break
