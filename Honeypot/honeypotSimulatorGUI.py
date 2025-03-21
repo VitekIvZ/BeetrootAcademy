@@ -148,12 +148,16 @@ class HoneypotSimulator:
                 except Exception as e:
                     print(f"[-] Error in brute force attempt: {e}")
 
-    def run_continuous_simulation(self, duration=300):
+    def run_continuous_simulation(self, duration=300, output_queue=None):
         """
         Runs a continuous simulation for a specified duration
         """
-        print(f"\n[*] Starting continuous simulation for {duration} seconds")
-        print(f"[*] Intensity level: {self.intensity}")
+        # print(f"\n[*] Starting continuous simulation for {duration} seconds")
+        # print(f"[*] Intensity level: {self.intensity}")
+        if output_queue:
+            output_queue.put(f"\n[*] Starting continuous simulation for {duration} seconds\n")
+            output_queue.put(f"[*] Intensity level: {self.intensity}\n")
+
 
         end_time = time.time() + duration
         
@@ -179,14 +183,18 @@ class HoneypotSimulator:
                     task_queue.put_nowait(task)  # Додаємо завдання до черги
                     executor.submit(task)  # Виконуємо завдання
                 except queue.Full:
-                    print("Task queue is full. Waiting for free space...")
+                    if output_queue:
+                        output_queue.put("Task queue is full. Waiting for free space...\n")
                     time.sleep(0.1)
                 except RuntimeError as e:
                     print(f"[-] Executor has been shut down: {e}")
                     break  # Вихід із циклу, якщо executor завершився
                 time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
-        print("[*] Continuous simulation finished.")
-        
+                
+        #print("[*] Continuous simulation finished.")
+        if output_queue:
+            output_queue.put("[*] Continuous simulation finished.\n")
+            
 class HoneypotSimulatorApp:
     def __init__(self, root):
         self.queue = queue.Queue()
@@ -266,6 +274,7 @@ class TextRedirector:
     def __init__(self, widget, tag="stdout"):
         self.widget = widget
         self.tag = tag
+        self.buffer = ""        
 
     # def write(self, text):
     #     self.widget.after(0, self.widget.insert, tk.END, text, (self.tag,))

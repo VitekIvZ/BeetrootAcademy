@@ -232,6 +232,7 @@ class TextRedirector:
     def __init__(self, widget, tag="stdout"):
         self.widget = widget
         self.tag = tag
+        self.buffer = ""
 
     # def write(self, text):
     #     self.widget.insert(tk.END, text, (self.tag,))
