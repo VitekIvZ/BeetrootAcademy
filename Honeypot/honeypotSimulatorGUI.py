@@ -178,8 +178,12 @@ class HoneypotSimulator:
                 except queue.Full:
                     print("Task queue is full. Waiting for free space...")
                     time.sleep(0.1)
+                except RuntimeError as e:
+                    print(f"[-] Executor has been shut down: {e}")
+                    break  # Вихід із циклу, якщо executor завершився
                 time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
-
+        print("[*] Continuous simulation finished.")
+        
 class HoneypotSimulatorApp:
     def __init__(self, root):
         self.root = root
