@@ -57,40 +57,40 @@ class HoneypotSimulator:
         }
 
     def simulate_connection(self, port):
-    """
-    Simulates a connection attempt to a specific port with realistic attack patterns
-    """
+        """
+        Simulates a connection attempt to a specific port with realistic attack patterns
+        """
         print(f"[DEBUG] simulate_connection called for port {port}")
         try:
-        # Create a new socket connection
+            # Create a new socket connection
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                ock.settimeout(5)
+                sock.settimeout(5)
             
                 print(f"[*] Attempting connection to {self.target_ip}:{port}")
                 sock.connect((self.target_ip, port))
 
-            # Get banner if any
+                # Get banner if any
                 try:
                     banner = sock.recv(1024)
                     print(f"[+] Received banner from port {port}: {banner.decode('utf-8', 'ignore').strip()}")
                 except socket.timeout:
                     print(f"[-] No banner received from port {port}")
 
-            # Send attack patterns based on the port
+                # Send attack patterns based on the port
                 if port in self.attack_patterns:
                     for command in self.attack_patterns[port]:
                         try:
                             print(f"[*] Sending command to port {port}: {command.strip()}")
                             sock.send(command.encode())
 
-                        # Wait for response
+                            # Wait for response
                             try:
                                 response = sock.recv(1024)
                                 print(f"[+] Received response: {response.decode('utf-8', 'ignore').strip()}")
                             except socket.timeout:
                                 print(f"[-] No response received from port {port}")
 
-                        # Add realistic delay between commands
+                            # Add realistic delay between commands
                             time.sleep(random.uniform(*self.intensity_settings[self.intensity]["delay_range"]))
                         except BrokenPipeError:
                             print(f"[-] Broken pipe error on port {port}. Connection might be closed.")
